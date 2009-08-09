@@ -3,7 +3,7 @@ importPackage(Packages.java.util);
 importPackage(Packages.java.text);
 importPackage(Packages.java.io);
 importPackage(Packages.java.net);
-importPackage(com.googlecode.utils);
+importPackage(com.googlecode.epgss.utils);
 
 function grab(channels) {
 	Log.log("Starting media.dir.bg grabber...");
