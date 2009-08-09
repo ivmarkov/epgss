@@ -1,0 +1,9 @@
+#!/bin/sh
+abspath="$(cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}")"
+dirpath=`dirname "$abspath"`
+if [ -n "$JAVA_HOME" ]; then
+  $JAVA_HOME/bin/java -Xms32m -Xmx512m -Depgss.exedir="$dirpath" -jar $0 $*
+else
+  java -Xms32m -Xmx512m -Depgss.exedir="$dirpath" -jar $0 $*
+fi
+exit
