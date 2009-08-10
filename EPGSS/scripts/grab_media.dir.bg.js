@@ -80,6 +80,14 @@ function grab(channels) {
 				program.channel = channel;
 				channel.programs.push(program);
 			}
+		} 
+		
+		if(tvChunk.td.(@["class"] == "BlockLight").img != <></>) {
+			// Channel logo image
+			if(channel != null) {
+				var imgs = tvChunk.td.(@["class"] == "BlockLight").img;
+				channel.logoUrl = imgs[0].@src;
+			}
 		}
 	}
 
