@@ -39,6 +39,7 @@ function format(channels, result) {
 		logStep("Generating keywords map");
 		
 		writer.println("<Keywords>");
+		writer.println(<Keyword id="k1" word="general"/>.toXMLString());
 		var keywords = createKeywordsMap(channels);
 		for (var keyword in keywords) {
 			var xml =
@@ -91,7 +92,7 @@ function format(channels, result) {
 						id={pid} 
 						uid={"!Program!" + pid} 
 						title={program.name}
-						keywords={getKeywordIdsString(keywords, program.categories)}
+						keywords={"k1," + getKeywordIdsString(keywords, program.categories)}
 						isMovie={program.categories != undefined && !!program.categories.film}
 						isSerial={program.categories != undefined && !!program.categories.serial}
 						isSports={program.categories != undefined && !!program.categories.sports}
@@ -248,7 +249,8 @@ function printPreamble(writer) {
 
 function createKeywordsMap(channels) {
 	var keywords = {};
-	var kid = 1;
+	var kid = 100;
+	keywords["all"] = "k" + kid++;
 	for each (var channel in channels) {
 		for each (var program in channel.programs) {
 			if(program.categories != undefined)
@@ -283,15 +285,11 @@ function createImagesMap(channels) {
 }
 
 function getKeywordIdsString(keywords, categories) {
-	var str = "";
-	
+	var str = keywords["all"];
 	if(categories != undefined)
 		for (var category in categories) {
-			if(categories[category] && keywords[category] != undefined) {
-				if(str.length > 0)
-					str += ",";
-				str += keywords[category];
-			}
+			if(categories[category] && keywords[category] != undefined)
+				str += "," + keywords[category];
 		}
 	
 	return str;
