@@ -123,7 +123,7 @@ function format(channels, result) {
 					uid={"!Service!" + channel.name} 
 					name={channel.name} 
 					callSign={channel.name}
-					logoImage={channel.logoUrl != undefined? images[channel.logoUrl]: ""}/>;
+					logoImage={channel.imageUrl != undefined? images[channel.imageUrl]: ""}/>;
 				
 			writer.println(xml.toXMLString());
 			sid++;
@@ -289,7 +289,7 @@ function getKeywordIdsString(keywords, categories) {
 		for (var category in categories) {
 			if(categories[category] && keywords[category] != undefined) {
 				if(str.length > 0)
-					str += ", ";
+					str += ",";
 				str += keywords[category];
 			}
 		}
