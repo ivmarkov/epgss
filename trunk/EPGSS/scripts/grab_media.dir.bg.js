@@ -9,18 +9,18 @@ function grab() {
 	Log.log("Starting media.dir.bg grabber...");
 	
 	var categories = [
-        {name: "automobile", param: urlEncode("АВТО")},
-        {name: "children", param: urlEncode("ДЕТСК")},
-        {name: "documentary", param: urlEncode("ДОКУМЕНТАЛН")},
-        {name: "action", param: urlEncode("ЕКШЪН")},
-        {name: "comedy", param: urlEncode("КОМЕДИ")},
-        {name: "fashion", param: urlEncode("МОДА")},
-        {name: "music", param: urlEncode("МУЗИК")},
-        {name: "news", param: urlEncode("НОВИН")},
-        {name: "serial", param: urlEncode("СЕРИАЛ")},
-        {name: "sports", param: urlEncode("СПОРТ")},
-        {name: "scifi", param: urlEncode("ФАНТАСТИК")},
-        {name: "film", param: urlEncode("ФИЛМ")}
+        {name: "automobile", param: "%C0%C2%D2%CE"},
+        {name: "children", param: "%C4%C5%D2%D1%CA"},
+        {name: "documentary", param: "%C4%CE%CA%D3%CC%C5%CD%D2%C0%CB%CD"},
+        {name: "action", param: "%C5%CA%D8%DA%CD%C5%CA%D8%DA%CD"},
+        {name: "comedy", param: "%CA%CE%CC%C5%C4%C8"},
+        {name: "fashion", param: "%CC%CE%C4%C0"},
+        {name: "music", param: "%CC%D3%C7%C8%CA"},
+        {name: "news", param: "%CD%CE%C2%C8%CD"},
+        {name: "serial", param: "%D1%C5%D0%C8%C0%CB"},
+        {name: "sports", param: "%D1%CF%CE%D0%D2"},
+        {name: "scifi", param: "%D4%C0%CD%D2%C0%D1%D2%C8%CA"},
+        {name: "film", param: "%D4%C8%CB%CC"}
 	];
 	
 	var step = 0;
@@ -179,10 +179,6 @@ function mapPrograms(channels) {
 	return function(channel, program) {
 		return map[key(channel, program)];
 	};
-}
-
-function urlEncode(str) {
-	return URLEncoder.encode(str, "WINDOWS-1251");
 }
 
 function extract(mask, value) {
