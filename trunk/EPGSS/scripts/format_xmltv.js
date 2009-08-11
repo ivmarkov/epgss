@@ -4,7 +4,7 @@ importPackage(Packages.java.io);
 importPackage(com.googlecode.epgss.utils);
 
 function format(channels, result) {
-	Log.log("Starting XMLTV formatter...");
+	Log.log("\n\n\nStarting XMLTV formatter...");
 
 	var writer = new PrintWriter(new File(result), "UTF-8");
 
