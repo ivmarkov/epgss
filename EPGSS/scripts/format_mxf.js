@@ -4,59 +4,135 @@ importPackage(Packages.java.io);
 importPackage(com.googlecode.epgss.utils);
 
 function format(channels, result) {
-	Log.log("Starting MXF formatter...");
+	Log.log("\n\n\nStarting MXF formatter...");
 
+	var step = 0;
+	var steps = 7;
+	
+	function logStep(str) {
+		Log.log((++step) + " of " + steps + ": " + str);
+	};
+
+	function logStepDetails(str) {
+		if(str != undefined)
+			Log.log(">> Done: " + str + ".");
+		else
+			Log.log(">> Done.");
+	};
+	
 	var writer = new PrintWriter(new File(result), "UTF-8");
 
 	try {
+		logStep("Generating preamble");
+
 		writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		writer.println("<MXF xmlns:sql=\"urn:schemas-microsoft-com:XML-sql\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
 		printPreamble(writer);
-		Log.log("1 of 4: Generated preamble.");
-
+		logStepDetails();
+		
 		writer.println("<With provider=\"EPGSS\">");
-		writer.println(<Keywords/>.toXMLString());
-		writer.println(<KeywordGroups/>.toXMLString());
-		writer.println(<GuideImages/>.toXMLString());
+		
+		//
+		// Generate keywords map
+		//
+		
+		logStep("Generating keywords map");
+		
+		writer.println("<Keywords>");
+		var keywords = createKeywordsMap(channels);
+		for (var keyword in keywords) {
+			var xml =
+				<Keyword
+					id={keywords[keyword]} 
+					word={keyword}/>;
+
+			writer.println(xml.toXMLString());
+		}	
+		writer.println("</Keywords>");
+		writer.println(<KeywordGroups><KeywordGroup uid="!KeywordGroup!k1" groupName="k1" keywords={getKeywordIdsString(keywords, keywords)}/></KeywordGroups>.toXMLString());
+		logStepDetails();
+		
+		//
+		// Generate images map
+		//
+		
+		logStep("Generating images map");
+		
+		writer.println("<GuideImages>");
+		var images = createImagesMap(channels);
+		for (var image in images) {
+			var xml = 
+				<GuideImage 
+					id={images[image]} 
+					uid={"!Image!" + image}
+					imageUrl={image}/>;
+
+			writer.println(xml.toXMLString());
+		}	
+		writer.println("</GuideImages>");
+		logStepDetails();
+		
 		writer.println(<People/>.toXMLString());
 		writer.println(<SeriesInfos/>.toXMLString());
 		writer.println(<Seasons/>.toXMLString());
 		
 		//
-		// Generate programs info first
+		// Generate programs info
 		//
+		
+		logStep("Generating programs info");
 		
 		writer.println("<Programs>");
 		var pid = 1;
 		for each (var channel in channels) {
 			for each (var program in channel.programs) {
 				var xml = 
-					<Program id={pid} uid={"!Program!" + pid} title={program.name}/>;
+					<Program 
+						id={pid} 
+						uid={"!Program!" + pid} 
+						title={program.name}
+						keywords={getKeywordIdsString(keywords, program.categories)}
+						isMovie={program.categories != undefined && !!program.categories.film}
+						isSerial={program.categories != undefined && !!program.categories.serial}
+						isSports={program.categories != undefined && !!program.categories.sports}
+						isNews={program.categories != undefined && !!program.categories.news}
+						isKids={program.categories != undefined && !!program.categories.children}
+						/>;
 
 				writer.println(xml.toXMLString());
 				pid++;
 			}
 		}
 		writer.println("</Programs>");
-		Log.log("2 of 4: Generated programmes info.");
+		logStepDetails();
 
 		//
-		// Generate schedule next
+		// Generate schedule
 		//
 		
 		writer.println(<Affiliates/>.toXMLString());
+		
+		logStep("Generating services");
 		
 		writer.println("<Services>");
 		var sid = 1;
 		for each (var channel in channels) {
 			var xml = 
-				<Service id={"s" + sid} uid={"!Service!" + channel.name} name={channel.name} callSign={channel.name}/>;
+				<Service 
+					id={"s" + sid} 
+					uid={"!Service!" + channel.name} 
+					name={channel.name} 
+					callSign={channel.name}
+					logoImage={channel.logoUrl != undefined? images[channel.logoUrl]: ""}/>;
 				
 			writer.println(xml.toXMLString());
 			sid++;
 		}
 		writer.println("</Services>");
+		logStepDetails();
 
+		logStep("Generating schedule");
+		
 		var dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
 		dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -95,12 +171,14 @@ function format(channels, result) {
 				
 			sid++;
 		}
-		Log.log("3 of 4: Generated schedule.");
+		logStepDetails();
 
 		//
 		// Finally, generate the lineups
 		//
 
+		logStep("Generating lineups");
+		
 		writer.println("<Lineups>");
 		writer.println("<Lineup id=\"l1\" uid=\"!Lineup!EPGSS\" name=\"EPGSS\" primaryProvider=\"!MCLineup!MainLineup\">");
 		writer.println("<channels>");
@@ -118,7 +196,7 @@ function format(channels, result) {
 
 		writer.println("</With>");
 		writer.println("</MXF>");
-		Log.log("4 of 4: Generated lineups.");
+		logStepDetails();
 	} finally {
 		writer.close();
 	}
@@ -166,4 +244,55 @@ function printPreamble(writer) {
 	writer.println(mcepgAssembly.toXMLString());
 	writer.println(mcstoreAssembly.toXMLString());
 	writer.println(providers.toXMLString());
+}
+
+function createKeywordsMap(channels) {
+	var keywords = {};
+	var kid = 1;
+	for each (var channel in channels) {
+		for each (var program in channel.programs) {
+			if(program.categories != undefined)
+				for (var category in program.categories) {
+					if(program.categories[category] && keywords[category] == undefined)
+						keywords[category] = "k" + kid++;
+				}
+		}
+	}
+
+	return keywords;
+}
+
+function createImagesMap(channels) {
+	var images = {};
+	var iid = 1;
+	for each (var channel in channels) {
+		if(channel.imageUrl != undefined) {
+			if(images[channel.imageUrl] == undefined)
+				images[channel.imageUrl] = "i" + iid++;
+		}
+		
+		for each (var program in channel.programs) {
+			if(program.imageUrl != undefined) {
+				if(images[program.imageUrl] == undefined)
+					images[program.imageUrl] = "i" + iid++;
+			}
+		}
+	}
+
+	return images;
+}
+
+function getKeywordIdsString(keywords, categories) {
+	var str = "";
+	
+	if(categories != undefined)
+		for (var category in categories) {
+			if(categories[category] && keywords[category] != undefined) {
+				if(str.length > 0)
+					str += ", ";
+				str += keywords[category];
+			}
+		}
+	
+	return str;
 }
