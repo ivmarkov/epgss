@@ -6,31 +6,51 @@ importPackage(com.googlecode.epgss.utils);
 function format(channels, result) {
 	Log.log("\n\n\nStarting XMLTV formatter...");
 
+	var step = 0;
+	var steps = 3;
+	
+	function logStep(str) {
+		Log.log((++step) + " of " + steps + ": " + str);
+	};
+
+	function logStepDetails(str) {
+		if(str != undefined)
+			Log.log(">> Done: " + str + ".");
+		else
+			Log.log(">> Done.");
+	};
+	
 	var writer = new PrintWriter(new File(result), "UTF-8");
 
 	try {
+		logStep("Generating DTD");
 		writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		printDocType(writer);
-		Log.log("1 of 3: Generated DTD.");
-
+		logStepDetails();
+		
 		writer.println("<tv generator-info-name=\"EPGSS\">");
 		
 		// Generate channel info first
+		logStep("Generating channels info");
 		for each (var channel in channels) {
 			var xml = 
 				<channel id={channel.name}>
 					<display-name lang="en">{channel.name}</display-name>
 				</channel>;
+		
+			if(channel.imageUrl != undefined)
+				xml.appendChild(<icon src={channel.imageUrl}/>);
 				
 			writer.println(xml.toXMLString());
 		}
-		Log.log("2 of 3: Generated channels info.");
+		logStepDetails();
 		
 		var timeZone = TimeZone.getTimeZone("Europe/Sofia");
 		var dateFormatter = new SimpleDateFormat("yyyyMMddHHmmss Z", Locale.US);
 		dateFormatter.setTimeZone(timeZone);
 
 		// Generate programs info next
+		logStep("Generating programs info");
 		for each (var channel in channels) {
 			for each (var program in channel.programs) {
 				var xml = 
@@ -38,12 +58,17 @@ function format(channels, result) {
 						<title lang="en">{program.name}</title>
 					</programme>;
 
+				if(program.categories != undefined)
+					for (var category in program.categories) {
+						xml.appendChild(<category lang="en">{category}</category>);
+					}
+					
 				writer.println(xml.toXMLString());
 			}
 		}
-
+		logStepDetails();
+		
 		writer.println("</tv>");
-		Log.log("3 of 3: Generated programmes info.");
 	} finally {
 		writer.close();
 	}
