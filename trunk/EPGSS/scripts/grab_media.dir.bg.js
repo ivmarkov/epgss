@@ -5,17 +5,83 @@ importPackage(Packages.java.io);
 importPackage(Packages.java.net);
 importPackage(com.googlecode.epgss.utils);
 
-function grab(channels) {
+function grab() {
 	Log.log("Starting media.dir.bg grabber...");
 	
-	var htmlString = HTML.getHTML(new URL("http://media.dir.bg/tv.php?step=1&f_tv[]=all&f_week[]=0&f_sub=&f_search="), "WINDOWS-1251");
-	Log.log("1 of 3: Content grabbed (schedule for next 7 days).");
+	var categories = [
+        {name: "automobile", param: urlEncode("АВТО")},
+        {name: "children", param: urlEncode("ДЕТСК")},
+        {name: "documentary", param: urlEncode("ДОКУМЕНТАЛН")},
+        {name: "action", param: urlEncode("ЕКШЪН")},
+        {name: "comedy", param: urlEncode("КОМЕДИ")},
+        {name: "fashion", param: urlEncode("МОДА")},
+        {name: "music", param: urlEncode("МУЗИК")},
+        {name: "news", param: urlEncode("НОВИН")},
+        {name: "serial", param: urlEncode("СЕРИАЛ")},
+        {name: "sports", param: urlEncode("СПОРТ")},
+        {name: "scifi", param: urlEncode("ФАНТАСТИК")},
+        {name: "film", param: urlEncode("ФИЛМ")}
+	];
+	
+	var step = 0;
+	var steps = categories.length + 1;
+	
+	function logStep(str) {
+		Log.log((++step) + " of " + steps + ": " + str);
+	};
+
+	function logStepDetails(str) {
+		if(str != undefined)
+			Log.log(">> Done: " + str + ".");
+		else
+			Log.log(">> Done.");
+	};
+
+	//
+	// First retrieve the programs uncategorized
+	//
+	
+	logStep("Retrieving uncategorized list of all programs");
+	var channels = grabPrograms("http://media.dir.bg/tv.php?step=1&f_tv[]=all&f_week[]=0&f_sub=&f_search=", logStepDetails);
+	
+	var channelsMap = mapPrograms(channels);
+	logStepDetails("Programs map created");
+	
+	//
+	// Now, iterate over all categories and re-retrieve the content for the specific category
+	//
+	
+	for each (var category in categories) {
+		logStep("Retrieving all programs in category \"" + category.name + "\"");
+		var categorizedChannels = grabPrograms("http://media.dir.bg/tv.php?step=1&f_tv[]=all&f_week[]=0&f_sub=&f_search=" + category.param, logStepDetails);
+		var counter = 0;
+		for each (var channel in categorizedChannels) {
+			for each (var program in channel.programs) {
+				var originalProgram = channelsMap(channel, program);
+				if(originalProgram != undefined) {
+					if(originalProgram.categories == undefined)
+						originalProgram.categories = {};
+					
+					originalProgram.categories[category.name] = true;
+					counter++;
+				}
+			}
+		}
+		logStepDetails(counter + " programs categorized");
+	}
+
+	return channels;
+}
+
+function grabPrograms(url, log) {
+	var htmlString = HTML.getHTML(new URL(url), "WINDOWS-1251");
+	log("Content grabbed (schedule for next 7 days)");
 
 	var html = new XML(Utils.trim(htmlString.substring(39))); // Bug 336551 
-	Log.log("2 of 3: Content HTML parsed.");
+	log("Content HTML parsed");
 	
-	if(channels == undefined || channels == null)
-		channels = [];
+	var channels = [];
+	var pcounter = 0;
 	
 	var year = 2009; // TODO
 	var timeZone = TimeZone.getTimeZone("Europe/Sofia");
@@ -79,6 +145,8 @@ function grab(channels) {
 				
 				program.channel = channel;
 				channel.programs.push(program);
+				
+				pcounter++;
 			}
 		} 
 		
@@ -86,14 +154,35 @@ function grab(channels) {
 			// Channel logo image
 			if(channel != null) {
 				var imgs = tvChunk.td.(@["class"] == "BlockLight").img;
-				channel.logoUrl = imgs[0].@src;
+				channel.imageUrl = imgs[0].@src;
 			}
 		}
 	}
 
-	Log.log("3 of 3: Channels extracted (" + channels.length + ").");
+	log(channels.length + " channels / " + pcounter + " programs extracted");
 
 	return channels;
+}
+
+function mapPrograms(channels) {
+	function key(channel, program) {
+		return channel.name + ":" + program.start.getTime();
+	}
+	
+	var map = {};
+	for each (var channel in channels) {
+		for each (var program in channel.programs) {
+			map[key(channel, program)] = program;
+		}
+	}
+	
+	return function(channel, program) {
+		return map[key(channel, program)];
+	};
+}
+
+function urlEncode(str) {
+	return URLEncoder.encode(str, "WINDOWS-1251");
 }
 
 function extract(mask, value) {
