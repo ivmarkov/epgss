@@ -81,7 +81,10 @@ function grabPrograms(url, log) {
 	log("Content HTML parsed");
 	
 	var channels = [];
-	var pcounter = 0;
+	
+	// TODO XXX FIXME: COMPLETE BUMMER! 
+	// Should be 0, but check this: http://www.linux-bg.org/cgi-bin/y/index.pl?page=article&id=advices&key=417556606&act=add_report&cmd=rate&plus=1 
+	var pcounter = 1; 
 	
 	var year = 2009; // TODO
 	var timeZone = TimeZone.getTimeZone("Europe/Sofia");
