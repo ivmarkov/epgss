@@ -83,7 +83,8 @@ function grabPrograms(url, log) {
 	var channels = [];
 	
 	// TODO XXX FIXME: COMPLETE BUMMER! 
-	// Should be 0, but check this: http://www.linux-bg.org/cgi-bin/y/index.pl?page=article&id=advices&key=417556606&act=add_report&cmd=rate&plus=1 
+	// Should be 0, but check this: http://www.linux-bg.org/cgi-bin/y/index.pl?page=article&id=advices&key=417556606&act=add_report&cmd=rate&plus=1
+	// In the end, no one cares, pcounter is only used for status-reporting
 	var pcounter = 1; 
 	
 	var year = 2009; // TODO
