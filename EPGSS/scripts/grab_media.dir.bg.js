@@ -87,7 +87,7 @@ function grabPrograms(url, log) {
 	// In the end, no one cares, pcounter is only used for status-reporting
 	var pcounter = 1; 
 	
-	var year = 2009; // TODO
+	var year = new Date().getFullYear(); // XXX: Not perfect in the week around New Year
 	var timeZone = TimeZone.getTimeZone("Europe/Sofia");
 	var dateParser = new SimpleDateFormat("dd.MM.yyyy HH.mm", Locale.US);
 	dateParser.setTimeZone(timeZone);
@@ -96,7 +96,10 @@ function grabPrograms(url, log) {
 	var lastProgram = null;
 	var channelDate, channelDateDDMM;
 
-	for each (var tvChunk in html.body.table[2].tbody.tr[0].td[2].table[2].tbody.tr) {
+	//log(html.body.table[1].tbody.tr.td[2].table[2].tbody.tr.toXMLString());
+	//throw "debug-stop";
+	
+	for each (var tvChunk in html.body.table[1].tbody.tr[0].td[2].table[2].tbody.tr) {
 		if(tvChunk.td[0].b != <></>) { 
 			// Channel heading
 			var channelName = Utils.trim(tvChunk.td[0].b.text().substring(1)).toUpperCase();
@@ -119,6 +122,13 @@ function grabPrograms(url, log) {
 			var programTimesChunk = tvChunk.td.span.b;
 			var programNamesChunk = tvChunk.td.text();
 
+			if(programTimesChunk.length() != programNamesChunk.length()) {
+				//log(tvChunk.td[0].toXMLString());
+				//throw "debug-stop";
+				log("SKIPPING channel \"" + channelName + "\": broken HTML");
+				continue;
+			}
+			
 			for(var j = 0; j < programTimesChunk.length(); j++) {
 				var program = {};
 				
