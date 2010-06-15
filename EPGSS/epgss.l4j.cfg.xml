@@ -1,8 +1,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
-  <jar>/home/ivan/workspace34/EPGSS/epgss.jar</jar>
-  <outfile>/home/ivan/workspace34/EPGSS/epgss.exe</outfile>
+  <jar>/home/ivan/workspace/EPGSS/epgss.jar</jar>
+  <outfile>/home/ivan/workspace/EPGSS/epgss.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir></chdir>
