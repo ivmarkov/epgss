@@ -96,10 +96,13 @@ function grabPrograms(url, log) {
 	var lastProgram = null;
 	var channelDate, channelDateDDMM;
 
-	//log(html.body.table[1].tbody.tr.td[2].table[2].tbody.tr.toXMLString());
+	//TODO: Why is this not finding anything???
+	//log(html..tr.(td.span.@["class"] == "SiteDescription1").toXMLString());
+	
+	//log(html.body.table[2].tbody.tr[0].td[2].table[2].tbody.tr.toXMLString());
 	//throw "debug-stop";
 	
-	for each (var tvChunk in html.body.table[1].tbody.tr[0].td[2].table[2].tbody.tr) {
+	for each (var tvChunk in html.body.table[2].tbody.tr[0].td[2].table[2].tbody.tr) {
 		if(tvChunk.td[0].b != <></>) { 
 			// Channel heading
 			var channelName = Utils.trim(tvChunk.td[0].b.text().substring(1)).toUpperCase();
