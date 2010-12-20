@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project default="jar" name="Create Runnable Jar for Project EPGSS">
+<project default="jar" name="Create Runnable Jar for Project EPGSS" basedir=".">
 <!--this file was created by Eclipse Runnable JAR Export Wizard-->
 <!--ANT 1.7 is required                                        -->
 <target name="jar">
-	<jar destfile="/home/ivan/workspace/EPGSS/epgss.jar" filesetmanifest="mergewithoutmain">
+	<jar destfile="${basedir}//epgss.jar" filesetmanifest="mergewithoutmain">
 		<manifest>
 			<attribute name="Built-By" value="${user.name}"/>
 			<attribute name="Main-Class" value="com.googlecode.epgss.EPGSS"/>
 			<attribute name="Class-Path" value="."/>
 		</manifest>
 		<fileset dir="/home/ivan/workspace/EPGSS/bin"/>
-		<zipfileset excludes="META-INF/*.SF" src="/home/ivan/workspace/EPGSS/htmlcleaner2_1.jar"/>
-		<zipfileset excludes="META-INF/*.SF" src="/home/ivan/workspace/EPGSS/js.jar"/>
+		<zipfileset excludes="META-INF/*.SF" src="${basedir}/htmlcleaner2_1.jar"/>
+		<zipfileset excludes="META-INF/*.SF" src="${basedir}/js.jar"/>
 	</jar>
 </target>
 </project>
